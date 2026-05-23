@@ -9,8 +9,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        560,
-        96
+        784,
+        -48
       ],
       "id": "978e5707-d585-4402-a0d0-cc45f4af06b2",
       "name": "Code in Python"
@@ -32,8 +32,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        336,
-        96
+        560,
+        -48
       ],
       "id": "754e4726-12bc-4c3a-b9a7-62ee03dcb18a",
       "name": "Stock List"
@@ -47,12 +47,35 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        784,
-        96
+        1008,
+        -48
       ],
       "id": "72ce7f1e-854d-426a-8f51-97f140a1a633",
       "name": "Send Telegram Message",
       "webhookId": "6263ced6-5f18-4173-b689-8ee7ccb3f77d"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d3e4f0cc-eedd-402c-8f4b-3c21d0e4141c",
+              "name": "telegram_token",
+              "value": "10023456789:abcdefghijklmnopqrstuvwxyz",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        48
+      ],
+      "id": "b3869272-2cea-4b69-a863-45ec52c02dc4",
+      "name": "Telegram Token"
     },
     {
       "parameters": {
@@ -65,11 +88,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -336,
-        0
+        -208,
+        48
       ],
-      "id": "57cfc069-520a-4149-9f32-2c5d68e151c3",
-      "name": "Schedule Trigger - test"
+      "id": "a6766f3d-c1dd-4ad8-95e0-9f21b09783db",
+      "name": "Schedule Trigger1"
     },
     {
       "parameters": {
@@ -93,11 +116,25 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        112,
-        192
+        336,
+        -144
       ],
       "id": "9889da95-5451-42e5-9452-314807bfbf6d",
-      "name": "Schedule Trigger"
+      "name": "Schedule Trigger2"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "import subprocess\nimport json\n\ntelegram_token = _items[0][\"json\"][\"telegram_token\"]\n\nprocess = subprocess.run(\n    [\n        \"/opt/runners/task-runner-python/.venv/bin/python\",\n        \"/home/runner/Telegram-new-Message.py\",\n        telegram_token\n    ],\n    capture_output=True,\n    text=True\n)\n\ntry:\n    result = json.loads(process.stdout)\nexcept:\n    result = {\n        \"status\": \"error\",\n        \"stderr\": process.stderr,\n        \"raw\": process.stdout\n    }\n\nreturn [result]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        48
+      ],
+      "id": "677a754d-e0f4-481b-a132-b1c735e7e628",
+      "name": "Telegram New Message Check"
     },
     {
       "parameters": {
@@ -110,50 +147,27 @@
           },
           "conditions": [
             {
-              "id": "2aa634f8-cb73-48ce-ac96-3e470fb5ced3",
-              "leftValue": "={{ $json.status }}",
-              "rightValue": "no_new_updates",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            },
-            {
               "id": "69fd6d88-0373-4686-845b-59fa53c97105",
               "leftValue": "={{ $json.status }}",
-              "rightValue": "skipped",
+              "rightValue": "update_message",
               "operator": {
                 "type": "string",
                 "operation": "equals"
               }
             }
           ],
-          "combinator": "or"
+          "combinator": "and"
         },
         "options": {}
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.3,
       "position": [
-        112,
-        0
+        336,
+        48
       ],
-      "id": "4c47b0c0-ad03-4886-ab23-f94f8c15ab04",
-      "name": "If"
-    },
-    {
-      "parameters": {
-        "language": "pythonNative",
-        "pythonCode": "import subprocess\nimport json\n\ntry:\n    process = subprocess.run(\n        [\"/opt/runners/task-runner-python/.venv/bin/python\", \"/home/runner/Telegram-new-Message.py\"],\n        capture_output=True, text=True\n    )\n    \n    # If the script failed (exit code not 0)\n    if process.returncode != 0:\n        return [{\"json\": {\n            \"status\": \"script_failed\",\n            \"exit_code\": process.returncode,\n            \"error_traceback\": process.stderr.strip() \n        }}]\n\n    script_output = json.loads(process.stdout)\n    return [{\"json\": script_output}]\n\nexcept Exception as e:\n    return [{\"json\": {\"error\": str(e)}}]"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        -112,
-        0
-      ],
-      "id": "719b79cd-0b7e-4b06-afd8-d391c84d6b71",
-      "name": "Telegram New Message Check"
+      "id": "72fd1399-8022-4203-8784-9f9258721fbc",
+      "name": "If status = update_message"
     }
   ],
   "pinData": {},
@@ -180,7 +194,7 @@
         ]
       ]
     },
-    "Schedule Trigger - test": {
+    "Telegram Token": {
       "main": [
         [
           {
@@ -191,20 +205,19 @@
         ]
       ]
     },
-    "Schedule Trigger": {
+    "Schedule Trigger1": {
       "main": [
         [
           {
-            "node": "Stock List",
+            "node": "Telegram Token",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "If": {
+    "Schedule Trigger2": {
       "main": [
-        [],
         [
           {
             "node": "Stock List",
@@ -218,7 +231,18 @@
       "main": [
         [
           {
-            "node": "If",
+            "node": "If status = update_message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If status = update_message": {
+      "main": [
+        [
+          {
+            "node": "Stock List",
             "type": "main",
             "index": 0
           }
@@ -232,7 +256,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "573fa325-39d7-4f94-84d7-33bad91c7d2a",
+  "versionId": "5698a91e-8e40-418a-9ab6-2e1b7d4b2d46",
   "meta": {
     "instanceId": "9bdd655979cab5a8fe3ca1bbf536768ac9d7dbf60487d98c6d811767a02d7538"
   },
